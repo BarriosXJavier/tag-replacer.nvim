@@ -46,7 +46,7 @@ function M.replace_tags_in_selection(from_tag, to_tag)
 	vim.api.nvim_buf_set_lines(bufnr, start_pos[1] - 1, end_pos[1], false, new_lines)
 end
 
--- Command to replace tags in the entire buffer
+-- replace tags in the entire buffer
 function M.setup()
 	vim.api.nvim_create_user_command("ReplaceTag", function(opts)
 		local args = vim.split(opts.args, " ")

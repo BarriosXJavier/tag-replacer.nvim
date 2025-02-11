@@ -4,7 +4,7 @@ local function replace_tags(text, from_tag, to_tag)
 	-- Escape special characters in the tag names
 	from_tag = from_tag:gsub("[%-%.%+%[%]%(%)%$%^%%%?%*]", "%%%1")
 
-	-- patterns for opening and closing tags
+	-- Regex patterns for opening and closing tags
 	local open_pattern = "<" .. from_tag .. "([^>]*)>"
 	local close_pattern = "</" .. from_tag .. ">"
 
@@ -46,7 +46,7 @@ function M.replace_tags_in_selection(from_tag, to_tag)
 	vim.api.nvim_buf_set_lines(bufnr, start_pos[1] - 1, end_pos[1], false, new_lines)
 end
 
--- Command to replace tags in the entire buffer
+-- replace tags in the entire buffer
 function M.setup()
 	vim.api.nvim_create_user_command("ReplaceTag", function(opts)
 		local args = vim.split(opts.args, " ")

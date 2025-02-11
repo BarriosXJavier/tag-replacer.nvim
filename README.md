@@ -1,6 +1,6 @@
 # tag-replacer.nvim
 
-A Neovim plugin for replacing HTML-style tags globally or in selections.
+A Neovim plugin for replacing HTML-style tags globally(within a file) or in selections.
 
 ## Installation
 
