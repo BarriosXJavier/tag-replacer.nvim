@@ -30,6 +30,6 @@ Plug 'BarriosXJavier/tag-replacer.nvim'
 ## Usage
 
 - Replace tags in entire buffer: `:ReplaceTag from_tag to_tag`
-- Replace tags in visual selection: `:ReplaceTagVisual from_tag to_tag`
+- Replace tags in visual selection: `:ReplaceTagInSelection from_tag to_tag`
 
 Example: `:ReplaceTag a Link`
