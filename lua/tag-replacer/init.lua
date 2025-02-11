@@ -137,7 +137,7 @@ function M.setup()
 		end
 		replace_tags_in_buffer(args[1], args[2])
 	end, {
-		nargs = 2,
+		nargs = "+",
 		desc = "Replace HTML-style tags throughout the buffer",
 	})
 
@@ -149,7 +149,7 @@ function M.setup()
 		end
 		replace_tag_under_cursor(args[1])
 	end, {
-		nargs = 1,
+		nargs = "1",
 		desc = "Replace the HTML-style tag under the cursor",
 	})
 
