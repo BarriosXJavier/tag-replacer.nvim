@@ -97,7 +97,7 @@ function M.setup()
 		end
 		replace_tag_under_cursor(args[1])
 	end, {
-		nargs = "1",
+		nargs = 1,
 		desc = "Replace the HTML-style tag under the cursor",
 	})
 
