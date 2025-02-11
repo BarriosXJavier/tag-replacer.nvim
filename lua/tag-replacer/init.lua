@@ -11,7 +11,7 @@ local function replace_tags(text, from_tag, to_tag)
 	end
 
 	from_tag = from_tag:gsub("[%-%.%+%[%]%(%)%$%^%%%?%*]", "%%%1")
-	local open_pattern = "<" .. from_tag .. "([^>]*)>"
+	local open_pattern = "<" .. from_tag .. "([^/>]*)>"
 	local close_pattern = "</" .. from_tag .. ">"
 
 	local result = text:gsub(open_pattern, "<" .. to_tag .. "%1>")
@@ -34,22 +34,23 @@ local function replace_tag_under_cursor(to_tag)
 		return
 	end
 
-	local before_cursor = line:sub(1, col)
-	local after_cursor = line:sub(col + 1)
+	local open_tag_name = line:match("<([%w%d%-]+)[^/>]*>")
+	local close_tag_name = line:match("</([%w%d%-]+)>")
+	local self_closing = line:match("<([%w%d%-]+)/>")
 
-	local open_tag_name = before_cursor:match(".*<([%w%d%-]+)[^>]*>")
-	local close_tag_name = before_cursor:match(".*</([%w%d%-]+)>")
+	if self_closing then
+		return
+	end -- Ignore self-closing tags
 
-	if open_tag_name then
-		local new_line = before_cursor:gsub("<" .. open_tag_name .. "([^>]*)>", "<" .. to_tag .. "%1>") .. after_cursor
+	if open_tag_name or close_tag_name then
+		local new_line = line:gsub("<" .. (open_tag_name or close_tag_name) .. "([^>]*)>", "<" .. to_tag .. "%1>")
+		new_line = new_line:gsub("</" .. (open_tag_name or close_tag_name) .. ">", "</" .. to_tag .. ">")
 		vim.api.nvim_buf_set_lines(bufnr, row - 1, row, false, { new_line })
-	elseif close_tag_name then
-		local new_line = before_cursor:gsub("</" .. close_tag_name .. ">", "</" .. to_tag .. ">") .. after_cursor
-		vim.api.nvim_buf_set_lines(bufnr, row - 1, row, false, { new_line })
+		vim.api.nvim_win_set_cursor(0, { row, col })
 	end
 end
 
-local function sync_partner_tag()
+local function sync_pair_tag()
 	local bufnr = vim.api.nvim_get_current_buf()
 	vim.api.nvim_buf_attach(bufnr, false, {
 		on_lines = function(_, _, _, start_row, _, _)
@@ -101,7 +102,7 @@ function M.setup()
 		desc = "Replace the HTML-style tag under the cursor",
 	})
 
-	sync_partner_tag()
+	sync_pair_tag()
 end
 
 return M
