@@ -19,44 +19,56 @@ end
 
 local function sync_pair_tag()
 	local bufnr = vim.api.nvim_get_current_buf()
-	local namespace = vim.api.nvim_create_namespace("tag_sync")
 
 	return vim.api.nvim_buf_attach(bufnr, false, {
-		on_lines = function(_, bufnr, _, start_row, start_col, _, end_row, end_col, _)
+		on_bytes = function(_, _, _, start_row, start_col, _, _, _, new_end_col)
+			-- Get the current line
 			local line = vim.api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
 			if not line then
 				return
 			end
 
-			-- Check if we have a tag modification
-			local modified_tag = line:match("</?([%w%-]+)")
-			if not modified_tag then
+			-- Extract the cursor position inside the line
+			local cursor_col = start_col + new_end_col
+
+			-- Get substring around cursor to detect tag modification
+			local before_cursor = line:sub(1, cursor_col)
+			local after_cursor = line:sub(cursor_col + 1)
+
+			-- Check if we're editing inside a tag
+			local tag_prefix = before_cursor:match(".*</?([%w%-]*)$")
+			if not tag_prefix then
+				return
+			end
+
+			-- Get the complete tag name
+			local tag_suffix = after_cursor:match("^([%w%-]*)[^>]*>")
+			if not tag_suffix then
+				return
+			end
+
+			local tag_name = tag_prefix .. tag_suffix
+			if #tag_name == 0 then
 				return
 			end
 
 			-- Get all buffer content
 			local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-			local content = table.concat(lines, "\n")
 
-			-- Find the tag pair
-			local opening_tag_pattern = "<" .. modified_tag .. "[^>]*>"
-			local closing_tag_pattern = "</" .. modified_tag .. ">"
-
-			-- Get positions of both tags
-			local opening_pos = content:find(opening_tag_pattern)
-			local closing_pos = content:find(closing_tag_pattern)
-
-			if opening_pos and closing_pos then
-				-- Extract the new tag name from the modified line
-				local new_tag = line:match("</?([%w%-]+)")
-				if new_tag and new_tag ~= modified_tag then
-					-- Update both tags
-					local new_content = content:gsub("<" .. modified_tag .. "([^>]*)>", "<" .. new_tag .. "%1>")
-					new_content = new_content:gsub("</" .. modified_tag .. ">", "</" .. new_tag .. ">")
-
-					-- Split and update buffer
-					local new_lines = vim.split(new_content, "\n")
-					vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, new_lines)
+			-- Find and update corresponding tag
+			for i, content in ipairs(lines) do
+				if i - 1 ~= start_row then -- Skip the current line
+					if content:match("</?%" .. tag_name .. "[^>]*>") then
+						local new_content = content
+						if content:match("<" .. tag_name .. "[^>]*>") then
+							new_content = content:gsub("<" .. tag_name .. "([^>]*)>", "<" .. tag_name .. "%1>")
+						elseif content:match("</" .. tag_name .. ">") then
+							new_content = content:gsub("</" .. tag_name .. ">", "</" .. tag_name .. ">")
+						end
+						if new_content ~= content then
+							vim.api.nvim_buf_set_lines(bufnr, i - 1, i, false, { new_content })
+						end
+					end
 				end
 			end
 		end,
