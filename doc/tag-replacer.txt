@@ -1,0 +1,21 @@
+*tag-replacer.txt*  Replace HTML-style tags in Neovim
+
+==============================================================================
+INTRODUCTION                                                *tag-replacer*
+
+tag-replacer is a Neovim plugin that helps you replace HTML-style tags either
+globally in a file or within a selection.
+
+==============================================================================
+COMMANDS                                                    *tag-replacer-commands*
+
+:ReplaceTag {from_tag} {to_tag}                            *:ReplaceTag*
+    Replace all instances of {from_tag} with {to_tag} in the entire buffer.
+    Example: `:ReplaceTag a Link`
+
+:ReplaceTagVisual {from_tag} {to_tag}                      *:ReplaceTagVisual*
+    Replace all instances of {from_tag} with {to_tag} in the visual selection.
+    Example: `:'<,'>ReplaceTagVisual a Link`
+
+==============================================================================
+
